@@ -1,9 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package logica;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /**
  * Esta clase permite realizar varias comprobaciones sobre los distintos campos que se necesitan para acceder a la cuenta de usuario
  *  se validan datos como el nombre, la password o la fecha 
@@ -44,14 +41,13 @@ public class Validacion {
         return resultado;
     }
     
-    public static boolean comprobarTelefono(String telf){
+    public static boolean validarTelefono(String telf){
         boolean resultado = true;
         if (validarString(telf) && telf.length()==9){
             try {
                 int resultadoConversion = Integer.parseInt(telf);
             } catch (NumberFormatException e){
                 System.err.println("El numero no puede contener caracteres");
-                // llamar a la función del log
                 resultado= false;
             }
             
@@ -59,6 +55,21 @@ public class Validacion {
             resultado = false;
         }
         
+        return resultado;
+    }
+    
+    public static boolean validarEmail(String emailIn){
+        boolean resultado = true;
+        if (validarString(emailIn)){
+            Pattern regexPattern = Pattern.compile("^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+                    + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = regexPattern.matcher(emailIn);
+            if (matcher.find()==false){
+                resultado = false;
+            }
+        } else {
+            resultado = false;
+        }
         return resultado;
     }
     
