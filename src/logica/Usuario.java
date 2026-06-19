@@ -24,14 +24,64 @@ import java.util.Scanner;
  */
 public abstract class Usuario {
     private static Scanner reader = new Scanner(System.in);
-    private String nombre;
+    private String email;
     private String password;
     private String dni;
     private String rol;
     private int estado;
+    /**
+     * Si el usuario ha podido logearse será true
+     */
     private boolean userOk;
     
     
+    public Usuario(String emailIn, String passIn){
+        this.email = emailIn;
+        this.password = passIn;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+   
+    public String getPassword() {
+        return password;
+    }
+
+    
+
+    public String getDni() {
+        return dni;
+    }
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
+    public int getEstado() {
+        return estado;
+    }
+
+    public void setEstado(int estado) {
+        this.estado = estado;
+    }
+
+    public boolean isUserOk() {
+        return userOk;
+    }
+
+    public void setUserOk(boolean userOk) {
+        this.userOk = userOk;
+    }
     
     
     
