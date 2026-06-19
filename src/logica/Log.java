@@ -24,7 +24,7 @@ public class Log {
         // Damos formato a los datos anteriores
         DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         String formattedDate = myDateObj.format(myFormatObj);
-        File fichero = new File(".\\src\\ficheros", "log.txt");
+        File fichero = new File(".\\src\\datos", "log.txt");
         try (
                 FileWriter fw = new FileWriter(fichero, Charset.forName("ISO-8859-1"), true)
                 )
