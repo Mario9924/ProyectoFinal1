@@ -73,4 +73,11 @@ public class Validacion {
         return resultado;
     }
     
+    public static boolean validarFecha(String fechaIn){
+        boolean resultado = true;
+    
+        
+        return resultado;
+    }
+    
 }
