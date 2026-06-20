@@ -38,8 +38,10 @@ public class BaseDatos {
                 }
             }
             System.out.println("Ya hay un usuario registrado con ese email");
+            Log.escribirLog("El usuario con email \"" + emailIn+"\" ya existe en la BD");
         } catch (SQLException ex) {
             System.err.println("Error al trabajar con la BD: " +ex);
+            Log.escribirLog("Error al trabajar con la BD: " +ex);
         }
         return resultado;
     }
@@ -69,35 +71,27 @@ public class BaseDatos {
                 ResultSet rs = stmt.executeQuery("Select * from `Usuario` where email = '" + datosUsuario[2] + "'");
                 ) 
         {
-
-            if (rs.isFirst?()) {
-                System.out.println("El usuario ya está registrado con ese email, por favor, inténtalo de nuevo");
-                Log.escribirLog("El usuario ya está registrado con ese email " + datosUsuario[2]);
-            } else {
-                try (PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
-                        + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                        ) 
-                {
-                    /*            
+            try (PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
+                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");) {
+                /*            
                     INSERT INTO `Usuario` (`Dni`, `Nombre`, `Email`, `Password`, `FechaNacimiento`, `Rol`, `Activo`, `Telefono`) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                     */
+                 */
 
-                    pstmt.setString(1, datosUsuario[0]); // dni
-                    pstmt.setString(2, datosUsuario[1]); // nombre
-                    pstmt.setString(3, datosUsuario[2]); // email
-                    pstmt.setString(4, datosUsuario[3]); // password
+                pstmt.setString(1, datosUsuario[0]); // dni
+                pstmt.setString(2, datosUsuario[1]); // nombre
+                pstmt.setString(3, datosUsuario[2]); // email
+                pstmt.setString(4, datosUsuario[3]); // password
 
-                    // Tenemos que parsear primero la fecha desde string al tipo Date para que no haya problemas
-                    LocalDate date = LocalDate.parse(datosUsuario[4], DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                    pstmt.setDate(5, Date.valueOf(date)); // fechanacimiento
+                // Tenemos que parsear primero la fecha desde string al tipo Date para que no haya problemas
+                LocalDate date = LocalDate.parse(datosUsuario[4], DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                pstmt.setDate(5, Date.valueOf(date)); // fechanacimiento
 
-                    pstmt.setString(6, datosUsuario[5]); // rol
-                    pstmt.setString(7, datosUsuario[6]); // activo
-                    pstmt.setString(8, datosUsuario[7]); // telefono
-                    pstmt.executeUpdate();
-                    System.out.println("Alta de usuario correcta");
-                }
+                pstmt.setString(6, datosUsuario[5]); // rol
+                pstmt.setString(7, datosUsuario[6]); // activo
+                pstmt.setString(8, datosUsuario[7]); // telefono
+                pstmt.executeUpdate();
+                System.out.println("Alta de usuario correcta");
             }
 
         } catch (SQLException sqlex) {
