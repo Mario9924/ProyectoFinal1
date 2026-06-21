@@ -3,6 +3,7 @@ package logica;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 
 /**
  *
@@ -241,7 +242,8 @@ public class BaseDatos {
      */
     public static void eliminarGasto(int identificadorGasto){
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
                 + "SET `activo`= `0` WHERE `Gasto`.`ID` = " + identificadorGasto);
                 ) 
         {    
@@ -261,5 +263,32 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
     }
+ 
+    /**
+     * Esta función permite obtener un listado de las categorías con su ID y nombre
+     * @return HashMap con la información de las categorías, siendo la clave el ID numérico de la tabla
+     */
+    public static HashMap<Integer, String> obtenerCategorias(){
+        HashMap<Integer, String> listadoCategorias = new HashMap<>();
+             
+        try(
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            Statement stmt = conn.createStatement(); 
+            ResultSet rs = stmt.executeQuery("select * from Categoria");
+            )
+        {
+            while (rs.next()){
+                listadoCategorias.put(rs.getInt("ID"), rs.getString("Nombre"));
+            }
+            
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+        return listadoCategorias;
+    } 
     
 }

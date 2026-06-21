@@ -64,7 +64,12 @@ public class Gasto {
     }
 
     
-    
+    /**
+     * Esta función permite la actualización de los atributos de un gasto. 
+     * Recibe una opción y el dato a cambiar,tras ello, se usará el setter correspondiente para modificar un atributo u otro
+     * @param opcionIn int con la opcion elegida
+     * @param informacionIn String con la informacion a modificar
+     */
     public void actualizarGasto(int opcionIn, String informacionIn){
         switch(opcionIn){
             case 1:
