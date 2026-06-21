@@ -56,6 +56,7 @@ public class BaseDatos {
      */
     public static void registroUsuario(String[] datosUsuario) {
         /*
+        Formato que tiene nuestro String[]
             0 - Dni
             1 - Nombre
             2 - Email
@@ -68,12 +69,11 @@ public class BaseDatos {
         try (
                 Connection conn = DriverManager.getConnection(url, user, pass);
                 Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("Select * from `Usuario` where email = '" + datosUsuario[2] + "'");
+                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
+                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 ) 
         {
-            try (PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
-                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");) {
-                /*            
+            /*            
                     INSERT INTO `Usuario` (`Dni`, `Nombre`, `Email`, `Password`, `FechaNacimiento`, `Rol`, `Activo`, `Telefono`) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                  */
@@ -92,7 +92,6 @@ public class BaseDatos {
                 pstmt.setString(8, datosUsuario[7]); // telefono
                 pstmt.executeUpdate();
                 System.out.println("Alta de usuario correcta");
-            }
 
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
