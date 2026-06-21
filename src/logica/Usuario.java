@@ -24,6 +24,7 @@ import java.util.Scanner;
  */
 public abstract class Usuario {
     private static Scanner reader = new Scanner(System.in);
+    private String nombre;
     private String email;
     private String password;
     private String fechaNacimiento;
@@ -32,7 +33,8 @@ public abstract class Usuario {
     private String rol;
     private int estado;
     
-    public Usuario(String dniIn, String emailIn, String passIn, String fechaNacimientoIn ,String telefonoIn, String rolIn , int estadoIn){
+    public Usuario(String nombreIn, String dniIn, String emailIn, String passIn, String fechaNacimientoIn ,String telefonoIn, String rolIn , int estadoIn){
+        this.nombre = nombreIn;
         this.dni = dniIn;
         this.email = emailIn;
         this.password = passIn;
@@ -42,6 +44,35 @@ public abstract class Usuario {
         this.estado = estadoIn;        
     }
 
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public void setFechaNacimiento(String fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    
+    public void setEmail(String email){
+        this.email = email;
+    }
+    
     public String getEmail() {
         return email;
     }
@@ -50,31 +81,59 @@ public abstract class Usuario {
     public String getPassword() {
         return password;
     }
-
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
     
 
     public String getDni() {
         return dni;
     }
 
-    public void setDni(String dni) {
-        this.dni = dni;
-    }
 
+    
+    
     public String getRol() {
         return rol;
-    }
-
-    public void setRol(String rol) {
-        this.rol = rol;
     }
 
     public int getEstado() {
         return estado;
     }
 
-    public void setEstado(int estado) {
-        this.estado = estado;
+    
+    public void modificarDatoUsuario(int opcionIn, String datoIn){
+        /*
+        pstmt.setString(1,usuarioIn.getNombre());
+            pstmt.setString(2, usuarioIn.getEmail());
+            pstmt.setString(3, usuarioIn.getPassword());
+            pstmt.setString(4, usuarioIn.getFechaNacimiento());
+            pstmt.setString(5, usuarioIn.getTelefono());
+       */
+        
+        switch(opcionIn){
+            case 1:
+                //Modificamos el nombre del usuario
+                this.setNombre(datoIn);
+                break;
+            case 2:
+                //Modificamos el email del usuario
+                this.setEmail(datoIn);
+                break;
+            case 3:
+                // Modificamos la contraseña del usuario
+                this.setPassword(datoIn);
+                break;
+            case 4:
+                // Modificamos la fecha de nacimiento
+                this.setFechaNacimiento(datoIn);
+                break;
+            case 5:
+                //Modificamos el teléfono
+                this.setTelefono(datoIn);
+                break;
+        }
     }
     
     

@@ -1,5 +1,6 @@
 package logica;
 
+import com.mysql.cj.jdbc.ConnectionImpl;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -161,9 +162,9 @@ public class BaseDatos {
             while (rs.next()) {
                 System.out.println(rs.getString("email") + " " + rs.getString("Nombre") + " " + rs.getString("FechaNacimiento"));
                 if (rs.getString("rol").equalsIgnoreCase("administrador")) {
-                    userCreado = new Administrador(rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
+                    userCreado = new Administrador(rs.getString("Nombre"), rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
                 } else {
-                    userCreado = new Normal(rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
+                    userCreado = new Normal(rs.getString("Nombre"),rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
                 }
             }
         } catch (SQLException sqlex) {
@@ -195,7 +196,7 @@ public class BaseDatos {
             7 - Telefono
          */
         
-        userCreado = new Normal(datosIn[0], datosIn[2], datosIn[3], datosIn[4], datosIn[7], datosIn[6], 1);
+        userCreado = new Normal(datosIn[1], datosIn[0], datosIn[2], datosIn[3], datosIn[4], datosIn[7], datosIn[6], 1);
         
         return userCreado;
     }
@@ -291,4 +292,33 @@ public class BaseDatos {
         return listadoCategorias;
     } 
     
+    
+    public static void actualizarDatosUsuario(Usuario usuarioIn){
+        try (
+                Connection conn = DriverManager.getConnection(url, user, pass);
+                PreparedStatement pstmt = conn.prepareStatement("UPADTE USUARIO set nombre = ?, Email = ?, Password = ?,"
+                        + " FechaNacimiento = ?, Telefono = ? where Dni = " + usuarioIn.getDni());
+            )        
+        {
+            pstmt.setString(1,usuarioIn.getNombre());
+            pstmt.setString(2, usuarioIn.getEmail());
+            pstmt.setString(3, usuarioIn.getPassword());
+            pstmt.setString(4, usuarioIn.getFechaNacimiento());
+            pstmt.setString(5, usuarioIn.getTelefono());
+            int resultado = pstmt.executeUpdate();
+            if (resultado > 0){
+                System.out.println("La actualización en la BD ha sido correcta");
+            } else {
+                System.err.println("Ha ocurrido un error a la hora de actualizar la información");
+                Log.escribirLog("Ha ocurrido un error a la hora de actualizar la información UPADTE USUARIO set nombre = ?, Email = ?, Password = ?,"
+                        + " FechaNacimiento = ?, Telefono = ? where Dni = " + usuarioIn.getDni());
+            }
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
 }
