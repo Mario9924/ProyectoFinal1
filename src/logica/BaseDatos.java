@@ -18,7 +18,7 @@ public class BaseDatos {
     /**
      * Esta función permite comprobar la existencia de un usuario, a partir de su email, en la BD
      * @param emailIn dirección de email del usuario
-     * @return true si no existe en la BD, false si no existe
+     * @return true si existe en la BD, false si no existe
      */
     public static boolean comprobarUsuario(String emailIn){
         boolean resultado = false;
@@ -26,7 +26,7 @@ public class BaseDatos {
          try (
                 Connection conn = DriverManager.getConnection(url, user, pass);
                 Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email = " + emailIn);
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn+"'");
                 ) 
         {
             int contador = 0;
@@ -37,8 +37,8 @@ public class BaseDatos {
                  break;
                 }
             }
-            System.out.println("Ya hay un usuario registrado con ese email");
-            Log.escribirLog("El usuario con email \"" + emailIn+"\" ya existe en la BD");
+//            System.out.println("Ya hay un usuario registrado con ese email");
+//            Log.escribirLog("El usuario con email \"" + emailIn+"\" ya existe en la BD");
         } catch (SQLException ex) {
             System.err.println("Error al trabajar con la BD: " +ex);
             Log.escribirLog("Error al trabajar con la BD: " +ex);
@@ -50,7 +50,17 @@ public class BaseDatos {
     
     /**
      * Esta función estática permite a un usuario darse de alta en la BD, se
-     * necesitan una serie de datos
+     * necesitan una serie de datos que serán recibidos por parámetro con un String[]
+     * El orde que ha de seguirse es el siguiente:
+     * 
+     *  0 - Dni
+        1 - Nombre
+        2 - Email
+        3 - Password
+        4 - FechaNacimiento
+        5 - Rol (por defecto usuario normal)
+        6 - Activo (por defecto 1)
+        7 - Telefono
      *
      * @param datosUsuario String[] con toda la información necesaria
      */
@@ -102,5 +112,69 @@ public class BaseDatos {
         }
 
     }
+    
+    /**
+     * Esta función comprueba que los datos de inicio de sesión sean correctos, se usa tras comprobar la existencia del email
+     * @param emailIn String email
+     * @param passIn String password
+     * @return true si el email y contraseña son correctos, false si la contraseña es incorrecta
+     */
+    public static boolean iniciarSesion(String emailIn, String passIn){
+        boolean resultado = false;
+        
+        try(
+                Connection conn = DriverManager.getConnection(url, user, pass);
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn+"'");
+            )
+        {
+            int contador = 0;
+            while(rs.next()){
+                contador++;
+                if (contador > 0){
+                    resultado = true;
+                 break;
+                }
+            }
+        }  catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+        return resultado;
+    }
+    
+    
+    /**
+     * Permite crear la sesión del usuario, siempre se utiliza tras comprobar si el email y contraseña son correctos
+     * @param emailIn email del usuario
+     * @param passIn password del usuario
+     */
+    public static void crearSesion(String emailIn, String passIn){
+    try(
+                Connection conn = DriverManager.getConnection(url, user, pass);
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn+"'");
+            )
+        {
+            System.out.println("Patata");
+            System.out.println("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn+"'");
+            while(rs.next()){
+                System.out.println(rs.getString("email")+ " " +  rs.getString("Nombre") + " " + rs.getString("FechaNacimiento"));
+            }
+        }  catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    
+    }
 
+    
+    
+    
 }
