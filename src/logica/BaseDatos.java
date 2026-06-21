@@ -48,6 +48,37 @@ public class BaseDatos {
     }
 
     /**
+     * Esta función comprueba que el usuario esté activo para poder crear la sesión
+     * @param emailIn email del usuario
+     * @return True si el usuario está activo, false si no está activo
+     */
+    public static boolean usuarioActivo(String emailIn){
+        boolean resultado = false;
+        
+        try (
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and estado = `1`");) {
+            int contador = 0;
+            while (rs.next()) {
+                contador++;
+                if (contador > 0) {
+                    resultado = true;
+                    break;
+                }
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Error al trabajar con la BD: " + ex);
+            Log.escribirLog("Error al trabajar con la BD: " + ex);
+        }
+        
+        return resultado;
+    }
+    
+    
+    
+    /**
      * Esta función estática permite a un usuario darse de alta en la BD, se
      * necesitan una serie de datos que serán recibidos por parámetro con un
      * String[] El orde que ha de seguirse es el siguiente:
