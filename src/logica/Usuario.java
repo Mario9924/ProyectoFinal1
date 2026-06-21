@@ -26,18 +26,20 @@ public abstract class Usuario {
     private static Scanner reader = new Scanner(System.in);
     private String email;
     private String password;
+    private String fechaNacimiento;
+    private String telefono;
     private String dni;
     private String rol;
     private int estado;
-    /**
-     * Si el usuario ha podido logearse será true
-     */
-    private boolean userOk;
     
-    
-    public Usuario(String emailIn, String passIn){
+    public Usuario(String dniIn, String emailIn, String passIn, String fechaNacimientoIn ,String telefonoIn, String rolIn , int estadoIn){
+        this.dni = dniIn;
         this.email = emailIn;
         this.password = passIn;
+        this.fechaNacimiento = fechaNacimientoIn;
+        this.telefono = telefonoIn;
+        this.rol = rolIn;
+        this.estado = estadoIn;        
     }
 
     public String getEmail() {
@@ -74,15 +76,6 @@ public abstract class Usuario {
     public void setEstado(int estado) {
         this.estado = estado;
     }
-
-    public boolean isUserOk() {
-        return userOk;
-    }
-
-    public void setUserOk(boolean userOk) {
-        this.userOk = userOk;
-    }
-    
     
     
 }

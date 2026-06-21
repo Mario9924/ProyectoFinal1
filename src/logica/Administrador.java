@@ -10,9 +10,11 @@ package logica;
  */
 public class Administrador extends Usuario {
     
-    public Administrador(String emailIn, String passIn) {
-        super(emailIn, passIn);
+    public Administrador(String dniIn, String emailIn, String passIn, String fechaNacimientoIn, String telefonoIn, String rolIn, int estadoIn) {
+        super(dniIn, emailIn, passIn, fechaNacimientoIn, telefonoIn, rolIn, estadoIn);
     }
+    
+    
     
     
 }
