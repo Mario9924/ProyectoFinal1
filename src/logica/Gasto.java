@@ -17,7 +17,6 @@ public class Gasto {
     private double importe;
     private String fecha;
     private int categoria;
-    private static HashMap<Integer, String> listadoCategorias = new HashMap<>();
     
     public Gasto(int idIn, String conceptIn, double importeIn, String fechaIn, int categoriaIn){
         this.identificador = idIn;
@@ -27,6 +26,11 @@ public class Gasto {
         this.categoria = categoriaIn;
     }
 
+    public int getIdentificador(){
+        return identificador;
+    }
+    
+    
     public String getConcepto() {
         return concepto;
     }
@@ -59,16 +63,28 @@ public class Gasto {
         this.categoria = categoria;
     }
 
-    public static HashMap<Integer, String> getListadoCategorias() {
-        return listadoCategorias;
+    
+    
+    public void actualizarGasto(int opcionIn, String informacionIn){
+        switch(opcionIn){
+            case 1:
+                //Actualizamos el concepto
+                this.setConcepto(informacionIn);
+                break;
+            case 2:
+                //Actualizamos el importe
+                this.setImporte(Double.parseDouble(informacionIn));
+                break;
+            case 3:
+                //Actualizamos la fecha
+                this.setFecha(informacionIn);
+                break;
+            case 4:
+                //Actualizamos la categoría
+                this.setCategoria(Integer.parseInt(informacionIn));
+                break;
+        }
     }
-
-    public static void setListadoCategorias(HashMap<Integer, String> listadoCategorias) {
-        Gasto.listadoCategorias = listadoCategorias;
-    }
-    
-    
-    
     
     
 }
