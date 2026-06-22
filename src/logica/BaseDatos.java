@@ -27,7 +27,9 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -230,7 +232,7 @@ public class BaseDatos {
      * @param gastoIn Objeto de tipo Gasto, contiene toda la información del
      * gasto
      */
-    public static void actualizarGasto(Gasto gastoIn) {
+    public static void modificarGasto(Gasto gastoIn) {
 
         try (
                 Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
@@ -296,7 +298,9 @@ public class BaseDatos {
         HashMap<Integer, String> listadoCategorias = new HashMap<>();
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Categoria");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("select * from Categoria");) {
             while (rs.next()) {
                 listadoCategorias.put(rs.getInt("ID"), rs.getString("Nombre"));
             }
@@ -313,7 +317,8 @@ public class BaseDatos {
 
     public static void actualizarDatosUsuario(Usuario usuarioIn) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPADTE USUARIO set nombre = ?, Email = ?, Password = ?,"
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("UPADTE USUARIO set nombre = ?, Email = ?, Password = ?,"
                 + " FechaNacimiento = ?, Telefono = ? where Dni = " + usuarioIn.getDni());) {
             pstmt.setString(1, usuarioIn.getNombre());
             pstmt.setString(2, usuarioIn.getEmail());
@@ -424,6 +429,44 @@ public class BaseDatos {
                 Log.escribirLog("Ha ocurrido un error a la hora de modificar la categoría en la consulta: "
                         + "UPDATE Categoria set nombre= ? where id = " + identificadorCategoria);
             }
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
+    
+    
+    public static void mostrarHistoricoGastos(){
+        try (
+                Connection conn = DriverManager.getConnection(url, user,pass);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("Select email, dni from Usuario");
+            ){
+            while (rs.next()){
+                System.out.println("Para el usuario de email " + rs.getString("Email"));
+                try (
+                      Statement stmt2 = conn.createStatement();
+                        ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe,"
+                                + "(select nombre from Categoria where id = g1.ID) as categoria "
+                                + "FROM Gasto g1 WHERE Activo = '1' AND Dni_usuario ='" + rs.getString("Dni") + "'");
+                    ) {
+                    System.out.printf("%-10s | %-20s | %-10s | %-10s%n", "Fecha", "Concepto", "Importe", "Categoria");
+                    while (rs2.next()){
+                        System.out.printf("%-10s | %-20s | %-10s | %-10s%n", rs2.getString("Fecha"), rs2.getString("nombre") , rs2.getString("Importe") , rs2.getString("Categoria"));
+                    }
+                    System.out.println("");
+                } catch (SQLException sqlex) {
+                    System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+                    Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+                } catch (Exception e) {
+                    System.out.println("Error en la BD: " + e);
+                    Log.escribirLog("Error en la BD: " + e);
+                }
+            }
+            
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
