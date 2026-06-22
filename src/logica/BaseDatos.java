@@ -27,9 +27,7 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -48,17 +46,17 @@ public class BaseDatos {
     }
 
     /**
-     * Esta función comprueba que el usuario esté activo para poder crear la sesión
+     * Esta función comprueba que el usuario esté activo para poder crear la
+     * sesión
+     *
      * @param emailIn email del usuario
      * @return True si el usuario está activo, false si no está activo
      */
-    public static boolean usuarioActivo(String emailIn){
+    public static boolean usuarioActivo(String emailIn) {
         boolean resultado = false;
-        
+
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and estado = `1`");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and estado = `1`");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -72,12 +70,10 @@ public class BaseDatos {
             System.err.println("Error al trabajar con la BD: " + ex);
             Log.escribirLog("Error al trabajar con la BD: " + ex);
         }
-        
+
         return resultado;
     }
-    
-    
-    
+
     /**
      * Esta función estática permite a un usuario darse de alta en la BD, se
      * necesitan una serie de datos que serán recibidos por parámetro con un
@@ -101,8 +97,7 @@ public class BaseDatos {
             7 - Telefono
          */
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");) {
             /*            
                     INSERT INTO `Usuario` (`Dni`, `Nombre`, `Email`, `Password`, `FechaNacimiento`, `Rol`, `Activo`, `Telefono`) 
@@ -147,11 +142,7 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");
-                ) 
-        {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -176,17 +167,14 @@ public class BaseDatos {
      *
      * @param emailIn email del usuario
      * @param passIn password del usuario
-     * @return Objeto de tipo Usuario, has de hacer instanceof para obtener el tipo correcto
+     * @return Objeto de tipo Usuario, has de hacer instanceof para obtener el
+     * tipo correcto
      */
     public static Usuario iniciarSesion(String emailIn, String passIn) {
         Usuario userCreado = null;
-        
+
         try (
-                var conn = DriverManager.getConnection(url, user, BaseDatos.pass);
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");
-            ) 
-        {
+                var conn = DriverManager.getConnection(url, user, BaseDatos.pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");) {
 
             System.out.println("Patata");
             System.out.println("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");
@@ -195,7 +183,7 @@ public class BaseDatos {
                 if (rs.getString("rol").equalsIgnoreCase("administrador")) {
                     userCreado = new Administrador(rs.getString("Nombre"), rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
                 } else {
-                    userCreado = new Normal(rs.getString("Nombre"),rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
+                    userCreado = new Normal(rs.getString("Nombre"), rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
                 }
             }
         } catch (SQLException sqlex) {
@@ -207,13 +195,16 @@ public class BaseDatos {
         }
         return userCreado;
     }
-    
+
     /**
-     * Esta función permite crear una usuario mediante un array de String que contiene los datos 
+     * Esta función permite crear una usuario mediante un array de String que
+     * contiene los datos
+     *
      * @param datosIn String[] con los datos necesarios para el usuario
-     * @return devuelve un objeto de tipo Usuario que luego se ha de castear al tipo correcto, en principio Normal
+     * @return devuelve un objeto de tipo Usuario que luego se ha de castear al
+     * tipo correcto, en principio Normal
      */
-    public static Usuario iniciarSesion(String[] datosIn){
+    public static Usuario iniciarSesion(String[] datosIn) {
         Usuario userCreado = null;
         /*
         Formato que tiene nuestro String[]
@@ -226,37 +217,36 @@ public class BaseDatos {
             6 - Activo (por defecto 1)
             7 - Telefono
          */
-        
+
         userCreado = new Normal(datosIn[1], datosIn[0], datosIn[2], datosIn[3], datosIn[4], datosIn[7], datosIn[6], 1);
-        
+
         return userCreado;
     }
 
-    
     /**
-     * Esta función actuaiza la línea en la que se encuentre el gasto realizado, actualizará TODA la línea con los datos actuales del Gasto
-     * @param gastoIn Objeto de tipo Gasto, contiene toda la información del gasto
+     * Esta función actuaiza la línea en la que se encuentre el gasto realizado,
+     * actualizará TODA la línea con los datos actuales del Gasto
+     *
+     * @param gastoIn Objeto de tipo Gasto, contiene toda la información del
+     * gasto
      */
-    public static void actualizarGasto(Gasto gastoIn){
-    
+    public static void actualizarGasto(Gasto gastoIn) {
+
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
-                        + "SET `Nombre` = ?, `Importe` = ?, `Fecha` = ?, `ID_categoria` = ? WHERE `Gasto`.`ID` = " + gastoIn.getIdentificador());
-            ) 
-        {
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
+                + "SET `Nombre` = ?, `Importe` = ?, `Fecha` = ?, `ID_categoria` = ? WHERE `Gasto`.`ID` = " + gastoIn.getIdentificador());) {
             pstmt.setString(1, gastoIn.getConcepto());
             pstmt.setDouble(2, gastoIn.getImporte());
             LocalDate date = LocalDate.parse(gastoIn.getFecha(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             pstmt.setDate(3, Date.valueOf(date)); // fechanacimiento
-            pstmt.setInt(4,gastoIn.getIdentificador());
+            pstmt.setInt(4, gastoIn.getIdentificador());
             int resultado = pstmt.executeUpdate();
-            if (resultado==1) {
+            if (resultado == 1) {
                 System.out.println("Actualización completada");
             } else {
                 System.err.println("Algo ha salido mal con la actualización");
-                Log.escribirLog("Algo ha salido mal con la actualización de datos para la sentencia: \"UPDATE `Gasto` \"\n" +
-"                        + \"SET `Nombre` = ?, `Importe` = ?, `Fecha` = ?, `ID_categoria` = ? WHERE `Gasto`.`ID` = \" "+ gastoIn.getIdentificador() );
+                Log.escribirLog("Algo ha salido mal con la actualización de datos para la sentencia: \"UPDATE `Gasto` \"\n"
+                        + "                        + \"SET `Nombre` = ?, `Importe` = ?, `Fecha` = ?, `ID_categoria` = ? WHERE `Gasto`.`ID` = \" " + gastoIn.getIdentificador());
             }
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
@@ -265,20 +255,19 @@ public class BaseDatos {
             System.out.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
-    
-    }   
-    
+
+    }
+
     /**
-     * Esta función permite eliminar un gasto, realmente modifica el campo activo de 1 a 0 en la BD
+     * Esta función permite eliminar un gasto, realmente modifica el campo
+     * activo de 1 a 0 en la BD
+     *
      * @param identificadorGasto ID del gasto
      */
-    public static void eliminarGasto(int identificadorGasto){
+    public static void eliminarGasto(int identificadorGasto) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
-                + "SET `activo`= `0` WHERE `Gasto`.`ID` = " + identificadorGasto);
-                ) 
-        {    
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
+                + "SET `activo`= `0` WHERE `Gasto`.`ID` = " + identificadorGasto);) {
             int resultado = pstmt.executeUpdate();
             if (resultado == 1) {
                 System.out.println("Registro eliminado");
@@ -295,24 +284,23 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
     }
- 
+
     /**
-     * Esta función permite obtener un listado de las categorías con su ID y nombre
-     * @return HashMap con la información de las categorías, siendo la clave el ID numérico de la tabla
+     * Esta función permite obtener un listado de las categorías con su ID y
+     * nombre
+     *
+     * @return HashMap con la información de las categorías, siendo la clave el
+     * ID numérico de la tabla
      */
-    public static HashMap<Integer, String> obtenerCategorias(){
+    public static HashMap<Integer, String> obtenerCategorias() {
         HashMap<Integer, String> listadoCategorias = new HashMap<>();
-             
-        try(
-            Connection conn = DriverManager.getConnection(url, user, pass);
-            Statement stmt = conn.createStatement(); 
-            ResultSet rs = stmt.executeQuery("select * from Categoria");
-            )
-        {
-            while (rs.next()){
+
+        try (
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Categoria");) {
+            while (rs.next()) {
                 listadoCategorias.put(rs.getInt("ID"), rs.getString("Nombre"));
             }
-            
+
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
@@ -321,23 +309,19 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
         return listadoCategorias;
-    } 
-    
-    
-    public static void actualizarDatosUsuario(Usuario usuarioIn){
+    }
+
+    public static void actualizarDatosUsuario(Usuario usuarioIn) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass);
-                PreparedStatement pstmt = conn.prepareStatement("UPADTE USUARIO set nombre = ?, Email = ?, Password = ?,"
-                        + " FechaNacimiento = ?, Telefono = ? where Dni = " + usuarioIn.getDni());
-            )        
-        {
-            pstmt.setString(1,usuarioIn.getNombre());
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPADTE USUARIO set nombre = ?, Email = ?, Password = ?,"
+                + " FechaNacimiento = ?, Telefono = ? where Dni = " + usuarioIn.getDni());) {
+            pstmt.setString(1, usuarioIn.getNombre());
             pstmt.setString(2, usuarioIn.getEmail());
             pstmt.setString(3, usuarioIn.getPassword());
             pstmt.setString(4, usuarioIn.getFechaNacimiento());
             pstmt.setString(5, usuarioIn.getTelefono());
             int resultado = pstmt.executeUpdate();
-            if (resultado > 0){
+            if (resultado > 0) {
                 System.out.println("La actualización en la BD ha sido correcta");
             } else {
                 System.err.println("Ha ocurrido un error a la hora de actualizar la información");
@@ -352,4 +336,46 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
     }
+
+    /**
+     * Esta función pasa de activo a no activo tanto al usuario como a los gastos que haya realizado
+     * @param userIn Objeto de tipo Usuario sobre el que se va a modificar la información
+     */
+    public static void eliminarUsuario(Usuario userIn) {
+        try (
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE Usuario set activo='0' where email=?"); 
+                PreparedStatement pstmt2 = conn.prepareStatement("UPDATE Gasto set activo='0' where dni_usuario=?");) {
+            pstmt.setString(1, userIn.getEmail());
+            int resultado = pstmt.executeUpdate();
+            if (resultado > 0) {
+                System.out.println("El usuario ha sido eliminado de la BD");
+            } else {
+                System.err.println("Ha ocurrido un error a la hora de eliminar al usuario");
+                Log.escribirLog("Ha ocurrido un error a la hora de eliminar al usuario en la consulta: "
+                        + "UPDATE Usuario set activo='0' where email= " + userIn.getEmail());
+            }
+            pstmt2.setString(2, userIn.getDni());
+
+            resultado = pstmt2.executeUpdate();
+            
+            if (resultado > 0) {
+                System.out.println("Los gastos asociados del usuario han sido eliminados");
+            } else {
+                System.err.println("Ha ocurrido un error a la hora de eliminar los gastos usuario");
+                Log.escribirLog("Ha ocurrido un error a la hora de eliminar los gastos del usuario en la consulta: "
+                        + "UPDATE Usuario set activo='0' where email= " + userIn.getEmail());
+            }
+
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
+    
+    
+    
 }
