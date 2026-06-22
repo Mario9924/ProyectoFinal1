@@ -376,6 +376,33 @@ public class BaseDatos {
         }
     }
     
+    /**
+     * Esta función permite la creación de una categoría indicando solamente su nombre
+     * @param nombreCategoria String con el nombre de la categoría
+     */
+    public static void crearCategoria(String nombreCategoria){
+        try (
+                Connection conn = DriverManager.getConnection(url,user,pass);
+                PreparedStatement pstmt = conn.prepareStatement("Insert into Categoria (`Nombre`) VALUES (?)");
+            )
+        {
+            pstmt.setString(1, nombreCategoria);
+            int resultado = pstmt.executeUpdate();
+            if (resultado > 0) {
+                System.out.println("La categoría ha sido creada");
+            } else {
+                System.err.println("Ha ocurrido un error a la hora de añadir la categoría");
+                Log.escribirLog("Ha ocurrido un error a la hora de añadir la categoría en la consulta: "
+                        + "Insert into Categoria (`Nombre`) VALUES (" + nombreCategoria +")");
+            }
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
     
     
 }
