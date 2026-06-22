@@ -515,4 +515,52 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
     }
+    
+    /**
+     * Esta función sin parámetros, permite al administrador obtener el histórico de gastos por categoría, la cantidad
+     *  que se ha gastado por categoría y el total de todas las categorías
+     */
+    public static void mostrarHistoricoGastosCategoria(){
+        try (
+                Connection conn = DriverManager.getConnection(url, user, pass);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("Select * from Categoria");
+            )
+        {
+            double gastadoTramo = 0;
+            double totalGastado = 0;
+            while (rs.next()){
+                System.out.println("Para la categoría : " + rs.getString("Nombre"));
+                try (
+                        Statement stmt2 = conn.createStatement();
+                        ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe "
+                        + "FROM Gasto WHERE Activo = '1' AND ID_categoria =" + rs.getInt("ID"));
+                    ) 
+                {
+                    System.out.printf("%-10s | %-20s | %-10s %n", "Fecha", "Concepto", "Importe");
+                    while (rs2.next()) {
+                        System.out.printf("%-10s | %-20s | %-10s %n", rs2.getString("Fecha"), rs2.getString("nombre"), rs2.getString("Importe"));
+                        gastadoTramo += rs2.getDouble("Importe");
+                    }
+                    System.out.println("Siendo el total de todo ello: " + gastadoTramo + " euros");
+                    System.out.println("");
+                    totalGastado += gastadoTramo;
+                    gastadoTramo = 0;
+                } catch (SQLException sqlex) {
+                    System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+                    Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+                } catch (Exception e) {
+                    System.out.println("Error en la BD: " + e);
+                    Log.escribirLog("Error en la BD: " + e);
+                }
+            }
+            System.out.println("Todas las categorías han sumado un total de: " + totalGastado + " euros");
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
 }
