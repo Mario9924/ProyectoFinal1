@@ -27,9 +27,7 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -298,9 +296,7 @@ public class BaseDatos {
         HashMap<Integer, String> listadoCategorias = new HashMap<>();
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("select * from Categoria");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Categoria");) {
             while (rs.next()) {
                 listadoCategorias.put(rs.getInt("ID"), rs.getString("Nombre"));
             }
@@ -317,8 +313,7 @@ public class BaseDatos {
 
     public static void actualizarDatosUsuario(Usuario usuarioIn) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                PreparedStatement pstmt = conn.prepareStatement("UPADTE USUARIO set nombre = ?, Email = ?, Password = ?,"
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPADTE USUARIO set nombre = ?, Email = ?, Password = ?,"
                 + " FechaNacimiento = ?, Telefono = ? where Dni = " + usuarioIn.getDni());) {
             pstmt.setString(1, usuarioIn.getNombre());
             pstmt.setString(2, usuarioIn.getEmail());
@@ -343,14 +338,15 @@ public class BaseDatos {
     }
 
     /**
-     * Esta función pasa de activo a no activo tanto al usuario como a los gastos que haya realizado
-     * @param userIn Objeto de tipo Usuario sobre el que se va a modificar la información
+     * Esta función pasa de activo a no activo tanto al usuario como a los
+     * gastos que haya realizado
+     *
+     * @param userIn Objeto de tipo Usuario sobre el que se va a modificar la
+     * información
      */
     public static void eliminarUsuario(Usuario userIn) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                PreparedStatement pstmt = conn.prepareStatement("UPDATE Usuario set activo='0' where email=?"); 
-                PreparedStatement pstmt2 = conn.prepareStatement("UPDATE Gasto set activo='0' where dni_usuario=?");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE Usuario set activo='0' where email=?"); PreparedStatement pstmt2 = conn.prepareStatement("UPDATE Gasto set activo='0' where dni_usuario=?");) {
             pstmt.setString(1, userIn.getEmail());
             int resultado = pstmt.executeUpdate();
             if (resultado > 0) {
@@ -363,7 +359,7 @@ public class BaseDatos {
             pstmt2.setString(2, userIn.getDni());
 
             resultado = pstmt2.executeUpdate();
-            
+
             if (resultado > 0) {
                 System.out.println("Los gastos asociados del usuario han sido eliminados");
             } else {
@@ -380,17 +376,16 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
     }
-    
+
     /**
-     * Esta función permite la creación de una categoría indicando solamente su nombre
+     * Esta función permite la creación de una categoría indicando solamente su
+     * nombre
+     *
      * @param nombreCategoria String con el nombre de la categoría
      */
-    public static void crearCategoria(String nombreCategoria){
+    public static void crearCategoria(String nombreCategoria) {
         try (
-                Connection conn = DriverManager.getConnection(url,user,pass);
-                PreparedStatement pstmt = conn.prepareStatement("Insert into Categoria (`Nombre`) VALUES (?)");
-            )
-        {
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("Insert into Categoria (`Nombre`) VALUES (?)");) {
             pstmt.setString(1, nombreCategoria);
             int resultado = pstmt.executeUpdate();
             if (resultado > 0) {
@@ -398,7 +393,7 @@ public class BaseDatos {
             } else {
                 System.err.println("Ha ocurrido un error a la hora de añadir la categoría");
                 Log.escribirLog("Ha ocurrido un error a la hora de añadir la categoría en la consulta: "
-                        + "Insert into Categoria (`Nombre`) VALUES (" + nombreCategoria +")");
+                        + "Insert into Categoria (`Nombre`) VALUES (" + nombreCategoria + ")");
             }
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
@@ -408,19 +403,18 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
     }
-    
+
     /**
-     * Esta función permite modificar una categoría, su nombre, a partir del identificador de dicha categoría.
+     * Esta función permite modificar una categoría, su nombre, a partir del
+     * identificador de dicha categoría.
+     *
      * @param identificadorCategoria Integer identificador de la categoría
      * @param nuevoNombreCategoria String con el nuevo nombre de la categoría
      */
-    public static void modificarCategoria(int identificadorCategoria, String nuevoNombreCategoria){
+    public static void modificarCategoria(int identificadorCategoria, String nuevoNombreCategoria) {
         try (
-                Connection conn = DriverManager.getConnection(url, user,pass);
-                PreparedStatement pstmt = conn.prepareStatement("UPDATE Categoria set nombre= ? where id = " + identificadorCategoria);
-            )
-        {
-            pstmt.setString(1,nuevoNombreCategoria);
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE Categoria set nombre= ? where id = " + identificadorCategoria);) {
+            pstmt.setString(1, nuevoNombreCategoria);
             int resultado = pstmt.executeUpdate();
             if (resultado > 0) {
                 System.out.println("La categoría ha sido modificada");
@@ -437,25 +431,26 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
     }
-    
-    
-    public static void mostrarHistoricoGastos(){
+
+    /**
+     * Esta función permite a los administradores visualizar el histórico de los
+     * gastos por cada usuario
+     */
+    public static void mostrarHistoricoGastos() {
         try (
-                Connection conn = DriverManager.getConnection(url, user,pass);
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("Select email, dni from Usuario");
-            ){
-            while (rs.next()){
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("Select email, dni from Usuario where activo='1'");) {
+            while (rs.next()) {
                 System.out.println("Para el usuario de email " + rs.getString("Email"));
                 try (
-                      Statement stmt2 = conn.createStatement();
+                        Statement stmt2 = conn.createStatement(); 
                         ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe,"
-                                + "(select nombre from Categoria where id = g1.ID) as categoria "
-                                + "FROM Gasto g1 WHERE Activo = '1' AND Dni_usuario ='" + rs.getString("Dni") + "'");
-                    ) {
+                        + "(select nombre from Categoria where id = g1.ID) as categoria "
+                        + "FROM Gasto g1 WHERE Activo = '1' AND Dni_usuario ='" + rs.getString("Dni") + "'");
+                        ) 
+                {
                     System.out.printf("%-10s | %-20s | %-10s | %-10s%n", "Fecha", "Concepto", "Importe", "Categoria");
-                    while (rs2.next()){
-                        System.out.printf("%-10s | %-20s | %-10s | %-10s%n", rs2.getString("Fecha"), rs2.getString("nombre") , rs2.getString("Importe") , rs2.getString("Categoria"));
+                    while (rs2.next()) {
+                        System.out.printf("%-10s | %-20s | %-10s | %-10s%n", rs2.getString("Fecha"), rs2.getString("nombre"), rs2.getString("Importe"), rs2.getString("Categoria"));
                     }
                     System.out.println("");
                 } catch (SQLException sqlex) {
@@ -466,7 +461,52 @@ public class BaseDatos {
                     Log.escribirLog("Error en la BD: " + e);
                 }
             }
-            
+
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
+
+    /**
+     * Permite ver los gastos históricos a partir de una categoría
+     *
+     * @param categoria Integer con el id de la categoría
+     */
+    public static void mostrarHistoricoGastosCategoria(int categoria) {
+        try (
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("Select * from Categoria where ID="+categoria);
+                ) 
+        {
+            while (rs.next()) {
+                System.out.println("Para la categoría: " + rs.getString("Nombre"));               
+                double totalGastado = 0;
+                try (
+                        Statement stmt2 = conn.createStatement();
+                        ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe "
+                        + "FROM Gasto WHERE Activo = '1' AND ID_categoria =" + rs.getInt("ID"));
+                    ) 
+                {
+                    System.out.printf("%-10s | %-20s | %-10s %n", "Fecha", "Concepto", "Importe");
+                    while (rs2.next()) {
+                        System.out.printf("%-10s | %-20s | %-10s %n", rs2.getString("Fecha"), rs2.getString("nombre"), rs2.getString("Importe"));
+                        totalGastado += rs2.getDouble("Importe");
+                    }
+                    System.out.println("Siendo el total de todo ello: " + totalGastado + " euros");
+                    System.out.println("");
+                } catch (SQLException sqlex) {
+                    System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+                    Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+                } catch (Exception e) {
+                    System.out.println("Error en la BD: " + e);
+                    Log.escribirLog("Error en la BD: " + e);
+                }
+            }
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
