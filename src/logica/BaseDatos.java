@@ -438,7 +438,12 @@ public class BaseDatos {
      */
     public static void mostrarHistoricoGastos() {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("Select email, dni from Usuario where activo='1'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("Select email, dni from Usuario where activo='1'");) 
+        {
+            double gastadoTramo = 0;
+            double totalGastado = 0;
             while (rs.next()) {
                 System.out.println("Para el usuario de email " + rs.getString("Email"));
                 try (
@@ -451,8 +456,12 @@ public class BaseDatos {
                     System.out.printf("%-10s | %-20s | %-10s | %-10s%n", "Fecha", "Concepto", "Importe", "Categoria");
                     while (rs2.next()) {
                         System.out.printf("%-10s | %-20s | %-10s | %-10s%n", rs2.getString("Fecha"), rs2.getString("nombre"), rs2.getString("Importe"), rs2.getString("Categoria"));
+                        gastadoTramo += rs2.getDouble("Importe");
                     }
+                    System.out.println("El usuario ha gastado un total de: " + gastadoTramo);
                     System.out.println("");
+                    totalGastado += gastadoTramo;
+                    gastadoTramo = 0;
                 } catch (SQLException sqlex) {
                     System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                     Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
@@ -461,7 +470,7 @@ public class BaseDatos {
                     Log.escribirLog("Error en la BD: " + e);
                 }
             }
-
+            System.out.println("El gasto total de todos los usuarios es de: " + totalGastado + " euros");
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
