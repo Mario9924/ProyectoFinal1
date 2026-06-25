@@ -27,7 +27,9 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass);
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -56,7 +58,9 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and estado = `1`");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and estado = `1`");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -97,7 +101,8 @@ public class BaseDatos {
             7 - Telefono
          */
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");) {
             /*            
                     INSERT INTO `Usuario` (`Dni`, `Nombre`, `Email`, `Password`, `FechaNacimiento`, `Rol`, `Activo`, `Telefono`) 
@@ -142,7 +147,9 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -223,6 +230,47 @@ public class BaseDatos {
         return userCreado;
     }
 
+    
+    /**
+     * Esta función permite dar de alta un gasto indicando en un String[] los siguientes datos:
+     * Nombre 
+     *      Importe 
+     *      Fecha 
+     *      Dni_usuario 
+     *      ID_categoria 
+     * @param datosGasto String[] con los datos mencionados anteriormente
+     */
+    public void registrarGasto(String[] datosGasto){
+        try (
+                Connection conn = DriverManager.getConnection(url,user,pass);
+                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Gasto (Nombre, Importe, Fecha, Dni_Usuario, ID_Categoria)"
+                        + "VALUES(?,?,?,?,?)");
+            )
+        {            
+            pstmt.setString(1, datosGasto[0]); //Nombre
+            pstmt.setString(2, datosGasto[1]); // Importe
+            LocalDate date = LocalDate.parse(datosGasto[3], DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            pstmt.setDate(4, Date.valueOf(date));
+            pstmt.setString(4, datosGasto[3]); // Dni_Usuario
+            pstmt.setString(5, datosGasto[4]); // ID_Categoria
+            int resultado = pstmt.executeUpdate();
+            if (resultado > 0){
+                System.out.println("Se ha realizado el registro del gasto correctamente");
+            } else {
+                System.err.println("Ha ocurrido un error a la hora de registrar el gasto");
+                Log.escribirLog("Ha ocurrido un error al registrar un nuevo gasto para la instrucción:\n "
+                        + "INSERT INTO Gasto (Nombre, Importe, Fecha, Dni_Usuario, ID_Categoria) VALUES("+datosGasto[0]+" , "+datosGasto[1]+" , "+datosGasto[2]+" , "+datosGasto[3]+" , "+datosGasto[4]+")");
+            }
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
+ 
+ 
     /**
      * Esta función actuaiza la línea en la que se encuentre el gasto realizado,
      * actualizará TODA la línea con los datos actuales del Gasto
@@ -233,7 +281,8 @@ public class BaseDatos {
     public static void modificarGasto(Gasto gastoIn) {
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
+                Connection conn = DriverManager.getConnection(url, user, pass);
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
                 + "SET `Nombre` = ?, `Importe` = ?, `Fecha` = ?, `ID_categoria` = ? WHERE `Gasto`.`ID` = " + gastoIn.getIdentificador());) {
             pstmt.setString(1, gastoIn.getConcepto());
             pstmt.setDouble(2, gastoIn.getImporte());
