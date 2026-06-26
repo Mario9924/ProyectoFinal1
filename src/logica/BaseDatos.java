@@ -4,6 +4,7 @@ package logica;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -604,5 +605,34 @@ public class BaseDatos {
             System.out.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
+    }
+    
+    
+    /**
+     * Esta función permite obtener un listado con los gastos que haya realizado el usuario
+     * @param userDni String con el dni del usuario
+     * @return ArrayList<Gasto> con los gastos que haya realizado el usuario
+     */
+    public static ArrayList gastosUsuario(String userDni){
+        ArrayList<Gasto> listadoGastos = new ArrayList<>();
+        
+        try (
+                Connection conn = DriverManager.getConnection(url, user , pass);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT * from Gasto where activo = '1' AND DNI_Usuario ='"+userDni+"'");
+            )
+        {
+            while (rs.next()){
+                listadoGastos.add(new Gasto(rs.getInt("ID"), rs.getString("Nombre"), rs.getDouble("Importe"), rs.getString("Fecha"), rs.getInt("ID_categoria")));
+            }
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.out.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+        
+        return listadoGastos;
     }
 }
