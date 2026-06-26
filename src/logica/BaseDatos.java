@@ -1,6 +1,6 @@
 package logica;
 
-import com.mysql.cj.jdbc.ConnectionImpl;
+
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,9 +27,7 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass);
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -58,9 +56,7 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and estado = `1`");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and estado = `1`");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -101,8 +97,7 @@ public class BaseDatos {
             7 - Telefono
          */
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");) {
             /*            
                     INSERT INTO `Usuario` (`Dni`, `Nombre`, `Email`, `Password`, `FechaNacimiento`, `Rol`, `Activo`, `Telefono`) 
@@ -147,9 +142,7 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -230,36 +223,47 @@ public class BaseDatos {
         return userCreado;
     }
 
-    
     /**
-     * Esta función permite dar de alta un gasto indicando en un String[] los siguientes datos:
-     * Nombre 
-     *      Importe 
-     *      Fecha 
-     *      Dni_usuario 
-     *      ID_categoria 
+     * Esta función permite dar de alta un gasto indicando en un String[] los
+     * siguientes datos: Nombre Importe Fecha Dni_usuario ID_categoria
+     * Al terminar y si todo es correcto devolverá un número con el ID del último Gasto creado para poder usarlo luego
      * @param datosGasto String[] con los datos mencionados anteriormente
+     * @return 0 si no encuentra nada, N si encuentra el identificador del último gasto creado
      */
-    public void registrarGasto(String[] datosGasto){
+    public static int registrarGasto(String[] datosGasto) {
+        int identificadorGasto = 0;
         try (
-                Connection conn = DriverManager.getConnection(url,user,pass);
-                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Gasto (Nombre, Importe, Fecha, Dni_Usuario, ID_Categoria)"
-                        + "VALUES(?,?,?,?,?)");
-            )
-        {            
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Gasto (Nombre, Importe, Fecha, Dni_Usuario, ID_Categoria)"
+                + "VALUES(?,?,?,?,?)");) {
             pstmt.setString(1, datosGasto[0]); //Nombre
-            pstmt.setString(2, datosGasto[1]); // Importe
+            pstmt.setDouble(2, Double.parseDouble(datosGasto[1])); // Importe
             LocalDate date = LocalDate.parse(datosGasto[3], DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            pstmt.setDate(4, Date.valueOf(date));
+            pstmt.setDate(3, Date.valueOf(date));
             pstmt.setString(4, datosGasto[3]); // Dni_Usuario
-            pstmt.setString(5, datosGasto[4]); // ID_Categoria
+            pstmt.setInt(5, Integer.parseInt(datosGasto[4])); // ID_Categoria
             int resultado = pstmt.executeUpdate();
-            if (resultado > 0){
+            if (resultado > 0) {
                 System.out.println("Se ha realizado el registro del gasto correctamente");
+                //Ahora necesito obtener el objeto 'Gasto' completo, de modo que el usuario lo añada a su lista
+
+                try (
+                        Statement stmt = conn.createStatement(); 
+                        ResultSet rs = stmt.executeQuery("select ID from Gasto where ID = (select max(ID) from gasto)");
+                        )
+                {
+                    identificadorGasto = rs.getInt("ID");                    
+                } catch (SQLException sqlex) {
+                    System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+                    Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+                } catch (Exception e) {
+                    System.out.println("Error en la BD: " + e);
+                    Log.escribirLog("Error en la BD: " + e);
+                }
+
             } else {
                 System.err.println("Ha ocurrido un error a la hora de registrar el gasto");
                 Log.escribirLog("Ha ocurrido un error al registrar un nuevo gasto para la instrucción:\n "
-                        + "INSERT INTO Gasto (Nombre, Importe, Fecha, Dni_Usuario, ID_Categoria) VALUES("+datosGasto[0]+" , "+datosGasto[1]+" , "+datosGasto[2]+" , "+datosGasto[3]+" , "+datosGasto[4]+")");
+                        + "INSERT INTO Gasto (Nombre, Importe, Fecha, Dni_Usuario, ID_Categoria) VALUES(" + datosGasto[0] + " , " + datosGasto[1] + " , " + datosGasto[2] + " , " + datosGasto[3] + " , " + datosGasto[4] + ")");
             }
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
@@ -268,9 +272,9 @@ public class BaseDatos {
             System.out.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
+        return identificadorGasto;
     }
- 
- 
+
     /**
      * Esta función actuaiza la línea en la que se encuentre el gasto realizado,
      * actualizará TODA la línea con los datos actuales del Gasto
@@ -281,8 +285,7 @@ public class BaseDatos {
     public static void modificarGasto(Gasto gastoIn) {
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass);
-                PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
+                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
                 + "SET `Nombre` = ?, `Importe` = ?, `Fecha` = ?, `ID_categoria` = ? WHERE `Gasto`.`ID` = " + gastoIn.getIdentificador());) {
             pstmt.setString(1, gastoIn.getConcepto());
             pstmt.setDouble(2, gastoIn.getImporte());
@@ -487,21 +490,15 @@ public class BaseDatos {
      */
     public static void mostrarHistoricoGastos() {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("Select email, dni from Usuario where activo='1'");) 
-        {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("Select email, dni from Usuario where activo='1'");) {
             double gastadoTramo = 0;
             double totalGastado = 0;
             while (rs.next()) {
                 System.out.println("Para el usuario de email " + rs.getString("Email"));
                 try (
-                        Statement stmt2 = conn.createStatement(); 
-                        ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe,"
+                        Statement stmt2 = conn.createStatement(); ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe,"
                         + "(select nombre from Categoria where id = g1.ID) as categoria "
-                        + "FROM Gasto g1 WHERE Activo = '1' AND Dni_usuario ='" + rs.getString("Dni") + "'");
-                        ) 
-                {
+                        + "FROM Gasto g1 WHERE Activo = '1' AND Dni_usuario ='" + rs.getString("Dni") + "'");) {
                     System.out.printf("%-10s | %-20s | %-10s | %-10s%n", "Fecha", "Concepto", "Importe", "Categoria");
                     while (rs2.next()) {
                         System.out.printf("%-10s | %-20s | %-10s | %-10s%n", rs2.getString("Fecha"), rs2.getString("nombre"), rs2.getString("Importe"), rs2.getString("Categoria"));
@@ -536,20 +533,13 @@ public class BaseDatos {
      */
     public static void mostrarHistoricoGastosCategoria(int categoria) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); 
-                Statement stmt = conn.createStatement(); 
-                ResultSet rs = stmt.executeQuery("Select * from Categoria where ID="+categoria);
-                ) 
-        {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("Select * from Categoria where ID=" + categoria);) {
             while (rs.next()) {
-                System.out.println("Para la categoría: " + rs.getString("Nombre"));               
+                System.out.println("Para la categoría: " + rs.getString("Nombre"));
                 double totalGastado = 0;
                 try (
-                        Statement stmt2 = conn.createStatement();
-                        ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe "
-                        + "FROM Gasto WHERE Activo = '1' AND ID_categoria =" + rs.getInt("ID"));
-                    ) 
-                {
+                        Statement stmt2 = conn.createStatement(); ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe "
+                        + "FROM Gasto WHERE Activo = '1' AND ID_categoria =" + rs.getInt("ID"));) {
                     System.out.printf("%-10s | %-20s | %-10s %n", "Fecha", "Concepto", "Importe");
                     while (rs2.next()) {
                         System.out.printf("%-10s | %-20s | %-10s %n", rs2.getString("Fecha"), rs2.getString("nombre"), rs2.getString("Importe"));
@@ -573,28 +563,22 @@ public class BaseDatos {
             Log.escribirLog("Error en la BD: " + e);
         }
     }
-    
+
     /**
-     * Esta función sin parámetros, permite al administrador obtener el histórico de gastos por categoría, la cantidad
-     *  que se ha gastado por categoría y el total de todas las categorías
+     * Esta función sin parámetros, permite al administrador obtener el
+     * histórico de gastos por categoría, la cantidad que se ha gastado por
+     * categoría y el total de todas las categorías
      */
-    public static void mostrarHistoricoGastosCategoria(){
+    public static void mostrarHistoricoGastosCategoria() {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass);
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("Select * from Categoria");
-            )
-        {
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("Select * from Categoria");) {
             double gastadoTramo = 0;
             double totalGastado = 0;
-            while (rs.next()){
+            while (rs.next()) {
                 System.out.println("Para la categoría : " + rs.getString("Nombre"));
                 try (
-                        Statement stmt2 = conn.createStatement();
-                        ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe "
-                        + "FROM Gasto WHERE Activo = '1' AND ID_categoria =" + rs.getInt("ID"));
-                    ) 
-                {
+                        Statement stmt2 = conn.createStatement(); ResultSet rs2 = stmt2.executeQuery("Select DATE_FORMAT(Fecha, '%d/%m/%Y') as Fecha, nombre, importe "
+                        + "FROM Gasto WHERE Activo = '1' AND ID_categoria =" + rs.getInt("ID"));) {
                     System.out.printf("%-10s | %-20s | %-10s %n", "Fecha", "Concepto", "Importe");
                     while (rs2.next()) {
                         System.out.printf("%-10s | %-20s | %-10s %n", rs2.getString("Fecha"), rs2.getString("nombre"), rs2.getString("Importe"));
