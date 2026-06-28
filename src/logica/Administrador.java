@@ -5,8 +5,9 @@
 package logica;
 
 /**
- *
- * @author Mario_
+ * Esta clase permite la instanciación de usuarios Administradores de la plataforma
+ * 
+ * @author Mario Gutiérrez González
  */
 public class Administrador extends Usuario {
     
