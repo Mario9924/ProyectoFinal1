@@ -2,6 +2,9 @@ package logica;
 
 import java.util.HashMap;
 import java.util.Scanner;
+import static logica.Main.pedirFecha;
+import static logica.Main.reader;
+import mail.EnvioJakartaMail;
 
 /**
  * Esta clase abstracta permite almacenar los datos de los dos posibles usuarios del proyecto:
@@ -153,4 +156,66 @@ public abstract class Usuario {
         listadoCategorias.put(identificador, nuevaCategoria);
     }
     
+    
+    /**
+     * Esta función permite registrar a un usuario en la BD, pueden usarlo tanto los administradores como los usuarios normales.
+     * No es necesaria la isntanciación de un objeto para acceder a ello.
+     */
+    public static void registroUsuario() {
+        String[] datosUsuario = new String[8];
+        /*
+        Formato que tiene nuestro String[]
+            0 - Dni
+            1 - Nombre
+            2 - Email
+            3 - Password
+            4 - FechaNacimiento
+            5 - Rol (por defecto usuario normal)
+            6 - Activo (por defecto 1)
+            7 - Telefono
+         */
+        // Registro de usuario
+        boolean emailRepetido = false;
+        do {
+            do {
+                System.out.println("Introduce tu email por favor");
+                datosUsuario[2] = reader.nextLine().toLowerCase();
+            } while (Validacion.validarEmail(datosUsuario[2]) == false);
+            if (BaseDatos.comprobarExistenciaUsuario(datosUsuario[2])) {
+                System.out.println("Lo sentimos, pero el email ya está asociado a un usuario");
+                emailRepetido = true;
+            } else {
+                emailRepetido = false;
+            }
+        } while (emailRepetido);
+        do {
+            System.out.println("Introduce tu dni, recuerda que ha de contener 8 números y una letra");
+            datosUsuario[0] = reader.next().toUpperCase();
+        } while (Validacion.validarDni(datosUsuario[0]) == false);
+        do {
+            System.out.println("Introduce tu nombre por favor");
+            datosUsuario[1] = reader.nextLine();
+        } while (Validacion.validarString(datosUsuario[1]) == false);
+        do {
+            System.out.println("Introduce tu contraseña por favor");
+            datosUsuario[3] = reader.nextLine();
+        } while (Validacion.validarString(datosUsuario[3]) == false);
+        String passHash = Encriptacion.generarHash(datosUsuario[3]);
+        datosUsuario[3] = passHash;
+        // fecha nacimiento
+        datosUsuario[4] = pedirFecha();
+        datosUsuario[5] = "normal";
+        datosUsuario[6] = "1";
+        do {
+            System.out.println("Introduce el número de teléfono por favor, no permitimos el formato +34, así que sólo usa números");
+            datosUsuario[7] = reader.nextLine();
+        } while (Validacion.validarTelefono(datosUsuario[7]) == false);
+        for (String datosUsuario1 : datosUsuario) {
+            System.out.println(datosUsuario1);
+        }
+        BaseDatos.registroUsuario(datosUsuario);
+        System.out.println("Registro completado correctamente!! Tienes que iniciar sesión por primera vez");
+        EnvioJakartaMail correo = new EnvioJakartaMail();
+        correo.correoBienvenida(datosUsuario[2]);
+    }
 }
