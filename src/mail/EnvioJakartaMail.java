@@ -80,7 +80,7 @@ public class EnvioJakartaMail {
      * Esta función permite enviar el correo de bienvenida al usuario
      * @param destino String con la dirección de destino del usuario que se ha dado de alta
      */
-    public static void correoBienvenida(String destino) {
+    public void correoBienvenida(String destino) {
         String cuerpo = "";
         try {
             cuerpo = "Bienvenido " + destino + "\n Este es un mensaje de bienvenida automático";
@@ -95,7 +95,7 @@ public class EnvioJakartaMail {
      * Esta función permite enviar el correo de baja de la plataforma
      * @param destino String con la dirección de correo del usuario
      */
-    public static void correoUsuarioBaja(String destino) {
+    public void correoUsuarioBaja(String destino) {
         String cuerpo = "";
         try {
             cuerpo = "Has decidido eliminar tu cuenta de correo. "
