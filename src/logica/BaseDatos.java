@@ -1,6 +1,5 @@
 package logica;
 
-
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -8,13 +7,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- *
- * @author Mario_
+ * Clase desde la que se va a gestionar la BD, ya sea el inicio de sesión, la gestión de usuarios o la gestión de gastos.
+ * Se pone a disposición del usuario (normal o administrador) todos los métodos necesarios para poder trabajar con el programa
+ * 
+ * Esta clase tiene una serie de datos como la url de conexión a la BD, el usuario administrador y la contraseña de este
+ * 
+ * @author Mario Gutiérrez González
  */
 public class BaseDatos {
 
+    /**
+     * Este atributo almacena la url de acceso a la BD
+     */
     private static String url = "jdbc:mysql://192.168.1.21:3306/proyecto";
+    /**
+     * Este atributo almacena el user administrador de la BD
+     */
     private static String user = "root";
+    /**
+     * Este atributo almacena la contraseña del usuario administrador de la BD
+     */
     private static String pass = "root";
 
     /**
@@ -28,7 +40,9 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -37,8 +51,6 @@ public class BaseDatos {
                     break;
                 }
             }
-//            System.out.println("Ya hay un usuario registrado con ese email");
-//            Log.escribirLog("El usuario con email \"" + emailIn+"\" ya existe en la BD");
         } catch (SQLException ex) {
             System.err.println("Error al trabajar con la BD: " + ex);
             Log.escribirLog("Error al trabajar con la BD: " + ex);
@@ -57,7 +69,9 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and estado = `1`");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' and activo ='1'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
@@ -100,10 +114,6 @@ public class BaseDatos {
         try (
                 Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("INSERT INTO `Usuario`"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");) {
-            /*            
-                    INSERT INTO `Usuario` (`Dni`, `Nombre`, `Email`, `Password`, `FechaNacimiento`, `Rol`, `Activo`, `Telefono`) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-             */
 
             pstmt.setString(1, datosUsuario[0]); // dni
             pstmt.setString(2, datosUsuario[1]); // nombre
@@ -111,7 +121,7 @@ public class BaseDatos {
             pstmt.setString(4, datosUsuario[3]); // password
 
             // Tenemos que parsear primero la fecha desde string al tipo Date para que no haya problemas
-            LocalDate date = LocalDate.parse(datosUsuario[4], DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            LocalDate date = LocalDate.parse(datosUsuario[4], DateTimeFormatter.ofPattern("yyyy-M-d"));
             pstmt.setDate(5, Date.valueOf(date)); // fechanacimiento
 
             pstmt.setString(6, datosUsuario[5]); // rol
@@ -143,12 +153,14 @@ public class BaseDatos {
         boolean resultado = false;
 
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
             int contador = 0;
             while (rs.next()) {
                 contador++;
-                if (contador > 0) {
-                    resultado = true;
+                if (contador > 0 && Encriptacion.verificarHash(passIn, rs.getString("password"))) {
+                    resultado = true; 
                     break;
                 }
             }
@@ -167,23 +179,21 @@ public class BaseDatos {
      * el email y contraseña son correctos
      *
      * @param emailIn email del usuario
-     * @param passIn password del usuario
      * @return Objeto de tipo Usuario, has de hacer instanceof para obtener el
      * tipo correcto
      */
-    public static Usuario iniciarSesion(String emailIn, String passIn) {
+    public static Usuario iniciarSesion(String emailIn) {
         Usuario userCreado = null;
 
         try (
-                var conn = DriverManager.getConnection(url, user, BaseDatos.pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");) {
+                var conn = DriverManager.getConnection(url, user, BaseDatos.pass); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery("select * from Usuario where Email ='" + emailIn + "'");) {
 
-            System.out.println("Patata");
-            System.out.println("select * from Usuario where Email ='" + emailIn + "' AND Password ='" + passIn + "'");
             while (rs.next()) {
-                System.out.println(rs.getString("email") + " " + rs.getString("Nombre") + " " + rs.getString("FechaNacimiento"));
                 if (rs.getString("rol").equalsIgnoreCase("administrador")) {
                     userCreado = new Administrador(rs.getString("Nombre"), rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
-                } else {
+                } else if (rs.getString("rol").equalsIgnoreCase("normal")){
                     userCreado = new Normal(rs.getString("Nombre"), rs.getString("Dni"), rs.getString("email"), rs.getString("password"), rs.getString("fechaNacimiento"), rs.getString("telefono"), rs.getString("rol"), Integer.parseInt(rs.getString("activo")));
                 }
             }
@@ -191,7 +201,7 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
         return userCreado;
@@ -199,7 +209,7 @@ public class BaseDatos {
 
     /**
      * Esta función permite crear una usuario mediante un array de String que
-     * contiene los datos
+     * contiene los datos del usuario
      *
      * @param datosIn String[] con los datos necesarios para el usuario
      * @return devuelve un objeto de tipo Usuario que luego se ha de castear al
@@ -226,19 +236,23 @@ public class BaseDatos {
 
     /**
      * Esta función permite dar de alta un gasto indicando en un String[] los
-     * siguientes datos: Nombre Importe Fecha Dni_usuario ID_categoria
-     * Al terminar y si todo es correcto devolverá un número con el ID del último Gasto creado para poder usarlo luego
+     * siguientes datos: Nombre Importe Fecha Dni_usuario ID_categoria Al
+     * terminar y si todo es correcto devolverá un número con el ID del último
+     * Gasto creado para poder usarlo luego
+     *
      * @param datosGasto String[] con los datos mencionados anteriormente
-     * @return 0 si no encuentra nada, N si encuentra el identificador del último gasto creado
+     * @return 0 si no encuentra nada, N si encuentra el identificador del
+     * último gasto creado
      */
     public static int registrarGasto(String[] datosGasto) {
         int identificadorGasto = 0;
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Gasto (Nombre, Importe, Fecha, Dni_Usuario, ID_Categoria)"
+                Connection conn = DriverManager.getConnection(url, user, pass);
+                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Gasto (Nombre, Importe, Fecha, Dni_Usuario, ID_Categoria)"
                 + "VALUES(?,?,?,?,?)");) {
             pstmt.setString(1, datosGasto[0]); //Nombre
             pstmt.setDouble(2, Double.parseDouble(datosGasto[1])); // Importe
-            LocalDate date = LocalDate.parse(datosGasto[3], DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            LocalDate date = LocalDate.parse(datosGasto[2], DateTimeFormatter.ofPattern("yyyy-M-d"));
             pstmt.setDate(3, Date.valueOf(date));
             pstmt.setString(4, datosGasto[3]); // Dni_Usuario
             pstmt.setInt(5, Integer.parseInt(datosGasto[4])); // ID_Categoria
@@ -248,16 +262,15 @@ public class BaseDatos {
                 //Ahora necesito obtener el objeto 'Gasto' completo, de modo que el usuario lo añada a su lista
 
                 try (
-                        Statement stmt = conn.createStatement(); 
-                        ResultSet rs = stmt.executeQuery("select ID from Gasto where ID = (select max(ID) from gasto)");
-                        )
-                {
-                    identificadorGasto = rs.getInt("ID");                    
+                        Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE); 
+                        ResultSet rs = stmt.executeQuery("select ID from Gasto where ID = (select max(ID) from Gasto)");
+                        ) {
+                    identificadorGasto = rs.getInt("ID");
                 } catch (SQLException sqlex) {
                     System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                     Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                 } catch (Exception e) {
-                    System.out.println("Error en la BD: " + e);
+                    System.err.println("Error en la BD: " + e);
                     Log.escribirLog("Error en la BD: " + e);
                 }
 
@@ -270,7 +283,7 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
         return identificadorGasto;
@@ -290,8 +303,7 @@ public class BaseDatos {
                 + "SET `Nombre` = ?, `Importe` = ?, `Fecha` = ?, `ID_categoria` = ? WHERE `Gasto`.`ID` = " + gastoIn.getIdentificador());) {
             pstmt.setString(1, gastoIn.getConcepto());
             pstmt.setDouble(2, gastoIn.getImporte());
-            LocalDate date = LocalDate.parse(gastoIn.getFecha(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            pstmt.setDate(3, Date.valueOf(date)); // fechanacimiento
+            pstmt.setDate(3, Date.valueOf(LocalDate.parse(gastoIn.getFecha(), DateTimeFormatter.ofPattern("yyyy-M-d"))));
             pstmt.setInt(4, gastoIn.getIdentificador());
             int resultado = pstmt.executeUpdate();
             if (resultado == 1) {
@@ -305,7 +317,7 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
 
@@ -319,11 +331,12 @@ public class BaseDatos {
      */
     public static void eliminarGasto(int identificadorGasto) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
-                + "SET `activo`= `0` WHERE `Gasto`.`ID` = " + identificadorGasto);) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE `Gasto` "
+                + "SET `activo`= '0' WHERE `Gasto`.`ID` = " + identificadorGasto);) {
             int resultado = pstmt.executeUpdate();
             if (resultado == 1) {
-                System.out.println("Registro eliminado");
+                System.err.println("Registro eliminado");
             } else {
                 System.err.println("Algo ha salido mal con el borrado");
                 Log.escribirLog("Algo ha salido mal con la actualización de datos para la sentencia: "
@@ -333,7 +346,7 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
     }
@@ -358,7 +371,7 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
         return listadoCategorias;
@@ -385,7 +398,7 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
     }
@@ -399,7 +412,11 @@ public class BaseDatos {
      */
     public static void eliminarUsuario(Usuario userIn) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE Usuario set activo='0' where email=?"); PreparedStatement pstmt2 = conn.prepareStatement("UPDATE Gasto set activo='0' where dni_usuario=?");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE Usuario set activo='0' where email=?"); 
+                PreparedStatement pstmt2 = conn.prepareStatement("UPDATE Gasto set activo='0' where dni_usuario=?");
+            ) 
+        {
             pstmt.setString(1, userIn.getEmail());
             int resultado = pstmt.executeUpdate();
             if (resultado > 0) {
@@ -425,24 +442,98 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
     }
+    
+    /**
+     * Esta función permite a los administradores eliminar a un usuario mediante su dirección de email, no necesitan más información
+     * @param email String con la dirección de email del usuario
+     */
+    public static void eliminarUsuario(String email){
+        try (
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE Usuario set activo='0' where email=?"); 
+                PreparedStatement pstmt2 = conn.prepareStatement("UPDATE Gasto set activo='0' where dni_usuario=(select dni from Usuario where email = `?`)");) 
+        {
+            pstmt.setString(1, email);
+            int resultado = pstmt.executeUpdate();
+            if (resultado > 0){
+                System.err.println("Se han eliminado los gastos asociados al usuario");
+                pstmt2.setString(1,email);
+                resultado = pstmt2.executeUpdate();
+                if (resultado > 0){
+                    System.out.println("Se ha eliminado al usuario");
+                } else {
+                    System.err.println("Algo ha salido mal y no hemos podido eliminar al usuario");
+                }
+            } else {
+                System.err.println("Algo ha salido mal y no hemos podido eliminar los gastos del usuario");
+            }
+        }  catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.err.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
+    
 
+    /**
+     * Esta función permite a los administradores visualizar todos los usuarios del proyecto que se encuentre en activo y NO sean administradores
+     * Devuelve por pantalla el nombre y el email de los usuarios, no tiene acceso a ningún otro dato
+     */
+    public static void mostrarUsuarios(){
+        int contador = 0;
+                try (
+                Connection conn = DriverManager.getConnection(url, user, pass);
+                Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet rs = stmt.executeQuery("Select nombre, email from Usuario where activo = '1' and rol='normal'");
+            )
+        {
+            if (rs.next()){
+                rs.beforeFirst();
+                while (rs.next()){
+                    contador++;
+                    System.out.println(contador + " " + rs.getString("Nombre") + " - " + rs.getString("Email"));
+                }
+            } else {
+                System.out.println("No hay usuarios NO administradores por el momento");
+            }
+        }  catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+        } catch (Exception e) {
+            System.err.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
+    
     /**
      * Esta función permite la creación de una categoría indicando solamente su
      * nombre
      *
      * @param nombreCategoria String con el nombre de la categoría
+     * @return Int con el identificador de la categoría creada
      */
-    public static void crearCategoria(String nombreCategoria) {
+    public static int crearCategoria(String nombreCategoria) {
+        int identificador = 0;
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("Insert into Categoria (`Nombre`) VALUES (?)");) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("Insert into Categoria (`Nombre`) VALUES (?)");) {
             pstmt.setString(1, nombreCategoria);
             int resultado = pstmt.executeUpdate();
             if (resultado > 0) {
                 System.out.println("La categoría ha sido creada");
+                try (
+                     Statement stmt = conn.createStatement();
+                        ResultSet rs  = stmt.executeQuery("Select max(ID) as ID from Categoria");
+                        )
+                {
+                    identificador = rs.getInt("ID");
+                }
             } else {
                 System.err.println("Ha ocurrido un error a la hora de añadir la categoría");
                 Log.escribirLog("Ha ocurrido un error a la hora de añadir la categoría en la consulta: "
@@ -452,9 +543,10 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
+        return identificador;
     }
 
     /**
@@ -466,7 +558,8 @@ public class BaseDatos {
      */
     public static void modificarCategoria(int identificadorCategoria, String nuevoNombreCategoria) {
         try (
-                Connection conn = DriverManager.getConnection(url, user, pass); PreparedStatement pstmt = conn.prepareStatement("UPDATE Categoria set nombre= ? where id = " + identificadorCategoria);) {
+                Connection conn = DriverManager.getConnection(url, user, pass); 
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE Categoria set nombre= ? where id = " + identificadorCategoria);) {
             pstmt.setString(1, nuevoNombreCategoria);
             int resultado = pstmt.executeUpdate();
             if (resultado > 0) {
@@ -480,7 +573,7 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
     }
@@ -513,7 +606,7 @@ public class BaseDatos {
                     System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                     Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                 } catch (Exception e) {
-                    System.out.println("Error en la BD: " + e);
+                    System.err.println("Error en la BD: " + e);
                     Log.escribirLog("Error en la BD: " + e);
                 }
             }
@@ -522,7 +615,7 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
     }
@@ -552,7 +645,7 @@ public class BaseDatos {
                     System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                     Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                 } catch (Exception e) {
-                    System.out.println("Error en la BD: " + e);
+                    System.err.println("Error en la BD: " + e);
                     Log.escribirLog("Error en la BD: " + e);
                 }
             }
@@ -560,7 +653,45 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
+            Log.escribirLog("Error en la BD: " + e);
+        }
+    }
+
+    /**
+     * Esta función permite ver los gastos del usuario, filtrando por una
+     * categoría
+     *
+     * @param identificadorCategoria Integer con el id de la categoría
+     * @param dniUsuario String con el dni del usuario
+     */
+    public static void mostrarHistoricoGastosUsuarioCategoria(int identificadorCategoria, String dniUsuario) {
+        try (
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                ResultSet.CONCUR_UPDATABLE); ResultSet rs = stmt.executeQuery("Select fecha, nombre, importe, (select nombre from Categoria where id = g1.ID_categoria) as Categoria"
+                        + " from Gasto g1 where activo ='1' AND Dni_usuario='" + dniUsuario + "' and ID_categoria=" + identificadorCategoria);) {
+
+            if (rs.next()) {
+                double totalGasto = 0;
+                String categoria = "";
+                rs.beforeFirst();
+                System.out.printf("%-10s | %-20s | %-10s | %-10s %n", "Fecha", "Concepto", "Importe", "Categoria");
+                while (rs.next()) {
+                    System.out.printf("%-10s | %-20s | %-10s | %-10s %n", rs.getString("Fecha"), rs.getString("Nombre"), rs.getString("Importe"), rs.getString("Categoria"));
+                    totalGasto += rs.getDouble("importe");
+                    categoria = rs.getString("Categoria");
+                }
+                System.out.println("El gasto total  de la categoría " + categoria + " es de " + totalGasto);
+            } else {
+                System.out.println("No hay gastos para la categoría elegida");
+            }
+
+        } catch (SQLException sqlex) {
+            System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
+            Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos, usando la consulta: \n"
+                    + "Select * from Gasto where activo ='1' AND Dni_usuario=" + dniUsuario + " and ID_categoria=" + identificadorCategoria);
+        } catch (Exception e) {
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
     }
@@ -593,7 +724,7 @@ public class BaseDatos {
                     System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                     Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
                 } catch (Exception e) {
-                    System.out.println("Error en la BD: " + e);
+                    System.err.println("Error en la BD: " + e);
                     Log.escribirLog("Error en la BD: " + e);
                 }
             }
@@ -602,37 +733,36 @@ public class BaseDatos {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
     }
-    
-    
+
     /**
-     * Esta función permite obtener un listado con los gastos que haya realizado el usuario
+     * Esta función permite obtener un listado con los gastos que haya realizado
+     * el usuario
+     *
      * @param userDni String con el dni del usuario
-     * @return ArrayList<Gasto> con los gastos que haya realizado el usuario
+     * @return ArrayList(Gasto) con los gastos que haya realizado el usuario
      */
-    public static ArrayList gastosUsuario(String userDni){
+    public static ArrayList gastosUsuario(String userDni) {
         ArrayList<Gasto> listadoGastos = new ArrayList<>();
-        
+
         try (
-                Connection conn = DriverManager.getConnection(url, user , pass);
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT * from Gasto where activo = '1' AND DNI_Usuario ='"+userDni+"'");
-            )
-        {
-            while (rs.next()){
+                Connection conn = DriverManager.getConnection(url, user, pass); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery("SELECT * from Gasto where activo = '1' AND DNI_Usuario ='" + userDni + "'");) {
+            while (rs.next()) {
                 listadoGastos.add(new Gasto(rs.getInt("ID"), rs.getString("Nombre"), rs.getDouble("Importe"), rs.getString("Fecha"), rs.getInt("ID_categoria")));
             }
         } catch (SQLException sqlex) {
             System.err.println("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
             Log.escribirLog("Ha habido un error a la hora de trabajar con la base de datos: " + sqlex);
         } catch (Exception e) {
-            System.out.println("Error en la BD: " + e);
+            System.err.println("Error en la BD: " + e);
             Log.escribirLog("Error en la BD: " + e);
         }
-        
+
         return listadoGastos;
     }
+    
+    
 }
