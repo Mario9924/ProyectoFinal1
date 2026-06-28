@@ -33,6 +33,11 @@ public abstract class Usuario {
     private String dni;
     private String rol;
     private int estado;
+    /**
+     * Este atributo permite a todos los usuarios hijos el acceso a un listado de las categorías de la BD
+     *  se almacena la información en un HashMap<Integer, String>  siendo la clave el ID de la categoría
+     *  y el value el nombre de la misma.
+     */
     private static  HashMap<Integer, String> listadoCategorias = new HashMap<>();
     
     public Usuario(String nombreIn, String dniIn, String emailIn, String passIn, String fechaNacimientoIn ,String telefonoIn, String rolIn , int estadoIn){
@@ -93,9 +98,6 @@ public abstract class Usuario {
         return dni;
     }
 
-
-    
-    
     public String getRol() {
         return rol;
     }
@@ -112,16 +114,17 @@ public abstract class Usuario {
         this.listadoCategorias = listadoCategorias;
     }
     
-    
-    public void modificarDatoUsuario(int opcionIn, String datoIn){
-        /*
-        pstmt.setString(1,usuarioIn.getNombre());
-            pstmt.setString(2, usuarioIn.getEmail());
-            pstmt.setString(3, usuarioIn.getPassword());
-            pstmt.setString(4, usuarioIn.getFechaNacimiento());
-            pstmt.setString(5, usuarioIn.getTelefono());
-       */
-        
+    /**
+     * Esta función permite de forma rápida actualizar los atributos del objeto Usuario mediante una serie de opciones:
+     * 1- Modificar el nombre
+     * 2- Modificar el email
+     * 3- Modificar la contraseña
+     * 4- Modificar la fecha de nacimiento
+     * 5- Modificar el teléfono
+     * @param opcionIn Int con la opción elegida
+     * @param datoIn String con la información que se va a modificar
+     */
+    public void modificarDatoUsuario(int opcionIn, String datoIn){        
         switch(opcionIn){
             case 1:
                 //Modificamos el nombre del usuario
