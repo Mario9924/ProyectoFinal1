@@ -1,29 +1,54 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package logica;
 
-import java.util.HashMap;
 
 /**
- *
- * @author Mario_
+ * Esta clase permite el volcado de los gastos de un usuario concreto a un objeto con el que poder trabajar.
+ * Todos los objetos son instanciados con los datos disponibles en la BD del proyecto o tras registrar el mismo usando los datos
+ * necesarios para darle de alta
+ * 
+ * @author Mario Gutiérrez González
  */
 public class Gasto {
     
-    private int identificador;
+    /**
+     * Este atributo FINAL se utiliza para identificar al gasto individualmente y proviene de la BD
+     * No se permite su modificación pero si que se puede obtener con el get correspondiente
+     */
+    private final int identificador;
     private String concepto;
     private double importe;
     private String fecha;
     private int categoria;
     
+    /**
+     * Este constructor permite instanciar un objeto de tipo Gasto "manualmente" proporcionando todos los datos necesarios;
+     * @param idIn Int con el identificador
+     * @param conceptIn String con el nombre
+     * @param importeIn Double con el importe
+     * @param fechaIn String con la fecha 
+     * @param categoriaIn String con el nombre de la categoría
+     */
     public Gasto(int idIn, String conceptIn, double importeIn, String fechaIn, int categoriaIn){
         this.identificador = idIn;
         this.concepto = conceptIn;
         this.importe = importeIn;
         this.fecha = fechaIn;
         this.categoria = categoriaIn;
+    }
+    
+    /**
+     * Este constructor permite la instanciación de un Gasto tras registrarle, de este modo evitamos una consulta innecesaria a la BD
+     *  puesto que ya disponemos de todos los datos necesarios a excepción del identificador. El identificador se obtiene tras
+     *  la insercción del gasto en la BD.
+     * @param identificadorIn Int con el id del identificador en la BD
+     * @param datosGastoIn String[] con los datos del gasto
+     */
+    public Gasto(int identificadorIn, String[] datosGastoIn){
+        this.identificador = identificadorIn;
+        this.concepto = datosGastoIn[0];
+        this.importe = Double.parseDouble(datosGastoIn[1]);
+        this.fecha = datosGastoIn[2];
+        this.categoria = Integer.parseInt(datosGastoIn[4]);
     }
 
     public int getIdentificador(){
@@ -90,6 +115,10 @@ public class Gasto {
                 break;
         }
     }
-    
+
+    @Override
+    public String toString() {
+        return "Gasto{" + "concepto=" + concepto + ", importe=" + importe + ", fecha=" + fecha;
+    }
     
 }
