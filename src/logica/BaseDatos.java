@@ -29,6 +29,32 @@ public class BaseDatos {
      */
     private static String pass = "root";
 
+    public static void setUrl(String url) {
+        BaseDatos.url = url;
+    }
+
+    public static void setUser(String user) {
+        BaseDatos.user = user;
+    }
+
+    public static void setPass(String pass) {
+        BaseDatos.pass = pass;
+    }
+
+    public static String getUrl() {
+        return url;
+    }
+
+    public static String getUser() {
+        return user;
+    }
+
+    public static String getPass() {
+        return pass;
+    }
+
+    
+    
     /**
      * Esta función permite comprobar la existencia de un usuario, a partir de
      * su email, en la BD

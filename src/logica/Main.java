@@ -6,15 +6,16 @@ import mail.EnvioJakartaMail;
 
 /**
  *
- * Clase principal del proyecto, la cuál combina todas las clases generadas para su uso en la aplicación real
- * 
+ * Clase principal del proyecto, la cuál combina todas las clases generadas para
+ * su uso en la aplicación real
+ *
  * @author Mario Gutiérrez González
  */
 public class Main {
 
     /**
-     * Se define como público y estático un Scanner para que sea utilizable
-     *  por todos los métodos y secciones de esta clase
+     * Se define como público y estático un Scanner para que sea utilizable por
+     * todos los métodos y secciones de esta clase
      */
     public static Scanner reader = new Scanner(System.in);
 
@@ -23,6 +24,9 @@ public class Main {
      */
     public static void main(String[] args) {
         // Declaración de variables
+        String urlBd = "";
+        String userBd = "";
+        String passBd = "";
         String[] datosGasto = new String[5];
         String emailUser = "";
         String password = "";
@@ -30,6 +34,7 @@ public class Main {
         int opcionIdCategoria = 0;
         int opcionMenu = 0;
         int opcionMenuGastos = 0;
+        int opcionMenuBd = 0;
         boolean continuar = true;
         boolean userOk = false; // Variable que comprueba que el usuario haya podido acceder correctamente a su cuenta
         // Objetos que vamos a poder crear, a partir de los datos de la BD
@@ -37,7 +42,47 @@ public class Main {
         Administrador userAdmin = null;
         // Este objeto de tipo EnvioJakartaMail es necesario para el correcto envío de correos desde la aplicación
         EnvioJakartaMail correo = null;
-        
+
+        do {
+            try {
+                System.out.println("Te damos como opción modificar los datos de acceso a la BD (recuerda usar el script sql primero)"
+                        + "\nIntroduce 0 para cambiarlo, introduce 1 si no quieres cambiar nada");
+                opcionMenuBd = reader.nextInt();
+            } catch (InputMismatchException ime){
+                System.err.println("Has introducido un valor incorrecto, necesito un número: " + ime);
+                reader.nextLine();
+            }
+        } while (opcionMenuBd < 0 || opcionMenuBd > 1 );
+       
+        if (opcionMenuBd == 0){
+            System.out.println("A continuación mostramos los datos actuales de la conexión a la BD, puedes cambiarlos si quieres");
+            System.out.println("La url de acceso a la BD es:  \n" + BaseDatos.getUrl());
+            System.out.println("Si quieres cambiarlo pulsa 0, si no, pulsa 1");
+            opcionMenuBd = reader.nextInt();
+            if (opcionMenuBd == 0) {
+                System.out.println("Introduce la dirección completa de acceso a la BD");
+                urlBd = reader.next();
+                BaseDatos.setUrl(urlBd);
+            }
+
+            System.out.println("El usuario administrador de la BD es: " + BaseDatos.getUser());
+            System.out.println("Si quieres cambiar el usuario pulsa 0, si no, pulsa 1");
+            opcionMenuBd = reader.nextInt();
+            if (opcionMenuBd == 0) {
+                System.out.println("Introduce el usuario correspondiente: ");
+                userBd = reader.next();
+                BaseDatos.setUrl(userBd);
+            }
+
+            System.out.println("La password del usuario administrador de la BD es: " + BaseDatos.getPass());
+            System.out.println("Si quieres cambiar la pass pulsa 0, si no, pulsa 1");
+            opcionMenuBd = reader.nextInt();
+            if (opcionMenuBd == 0) {
+                System.out.println("Introduce la password correspondiente: ");
+                passBd = reader.next();
+                BaseDatos.setUrl(passBd);
+            }
+        }
 
         while (continuar) {
             try {
@@ -59,10 +104,10 @@ public class Main {
                             System.out.println("Introduce tu email por favor");
                             emailUser = reader.next();
                             if (Validacion.validarEmail(emailUser) && BaseDatos.comprobarExistenciaUsuario(emailUser)) {
-                                if (BaseDatos.usuarioActivo(emailUser)){
+                                if (BaseDatos.usuarioActivo(emailUser)) {
                                     i = 4;
-                                userOk = true;
-                                System.out.println("Email correcto!");
+                                    userOk = true;
+                                    System.out.println("Email correcto!");
                                 } else {
                                     System.out.println("El usuario está desactivado, ponte en contacto con soporte");
                                     i = 4;
@@ -347,15 +392,15 @@ public class Main {
                                         Log.escribirLog("Ha ocurrido un error inesperado: " + ex);
                                     }
                                 } while (userAdmin.getListadoCategorias().containsKey(clave) == false);
-                                
+
                                 do {
                                     System.out.println("Introduce el nuevo nombre de la categoría por favor, recuerda que no se puede repetir");
                                     informacion = reader.nextLine();
                                     char primeraLetra = informacion.charAt(0);
                                     primeraLetra -= 32;
                                     informacion = primeraLetra + informacion.substring(1, informacion.length());
-                                } while(userAdmin.getListadoCategorias().containsValue(informacion));
-                                
+                                } while (userAdmin.getListadoCategorias().containsValue(informacion));
+
                                 userAdmin.getListadoCategorias().replace(clave, informacion);
                                 BaseDatos.modificarCategoria(clave, informacion);
                                 break;
@@ -382,11 +427,11 @@ public class Main {
 
     }
 
-   
-
     /**
-     * Esta función permite la petición de una fecha para poder optimizar el código
-     * @return 
+     * Esta función permite la petición de una fecha para poder optimizar el
+     * código
+     *
+     * @return
      */
     public static String pedirFecha() {
         String fecha = "";
@@ -403,7 +448,6 @@ public class Main {
             mes = reader.nextInt();
         } while (Validacion.comprobarMes(mes) == false);
 
-        
         do {
             System.out.println("Introduce el día por favor, ten en cuenta que los años bisiesto tienen 29 días en febrero");
             dia = reader.nextInt();
