@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 /**
  * Esta clase permite realizar varias comprobaciones sobre los distintos campos
  * que se necesitan para acceder a la cuenta de usuario se validan datos como el
- * nombre, la password o la fecha
+ * nombre, el dni del usuario, la password, la fecha o el importe
  *
  *
  * @author Mario Gutiérrez González
@@ -117,7 +117,7 @@ public class Validacion {
      */
     public static boolean comprobarYear(int yearIn) {
         boolean resultado = true;
-        if (yearIn < 1950 && yearIn > 2100) {
+        if (yearIn < 1950 || yearIn > 2100) {
             resultado = false;
         }
         return resultado;
@@ -193,4 +193,18 @@ public class Validacion {
         }
         return resultado;
     }
+    
+    /**
+     * Esta función permite validar que el importe sea superior a 0
+     * @param importeIn Double con el importe introducido
+     * @return true si es > 0, false si no lo es
+     */
+    public static boolean validarImporte(double importeIn){
+        boolean resultado = false;
+        if (importeIn > 0){
+            resultado = true;
+        }        
+        return resultado;
+    }
+    
 }
