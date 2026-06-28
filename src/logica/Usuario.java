@@ -1,5 +1,6 @@
 package logica;
 
+import java.util.HashMap;
 import java.util.Scanner;
 
 /**
@@ -32,6 +33,7 @@ public abstract class Usuario {
     private String dni;
     private String rol;
     private int estado;
+    private static  HashMap<Integer, String> listadoCategorias = new HashMap<>();
     
     public Usuario(String nombreIn, String dniIn, String emailIn, String passIn, String fechaNacimientoIn ,String telefonoIn, String rolIn , int estadoIn){
         this.nombre = nombreIn;
@@ -102,6 +104,14 @@ public abstract class Usuario {
         return estado;
     }
 
+    public HashMap<Integer, String> getListadoCategorias() {
+        return listadoCategorias;
+    }
+
+    public void setListadoCategorias(HashMap<Integer, String> listadoCategorias) {
+        this.listadoCategorias = listadoCategorias;
+    }
+    
     
     public void modificarDatoUsuario(int opcionIn, String datoIn){
         /*
@@ -136,5 +146,8 @@ public abstract class Usuario {
         }
     }
     
+    public static void addCategoria(int identificador, String nuevaCategoria){
+        listadoCategorias.put(identificador, nuevaCategoria);
+    }
     
 }
